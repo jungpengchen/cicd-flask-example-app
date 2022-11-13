@@ -1,0 +1,3 @@
+[submodule "flask-realworld-example-app"]
+	path = flask-realworld-example-app
+	url = https://github.com/gothinkster/flask-realworld-example-app.git
