@@ -2,50 +2,63 @@ name: CICD process
 on:
   push:
     branches:
-      - main
+      - dev
       - prod
 jobs:
-  init_var:
+  build_and_deploy:
     runs-on: ubuntu-latest
     steps:
-      - shell: bash
+      - name: set environment variables
+        id: set_env
         env:
           CONDUIT_SECRET: ${{ secrets.SECRET_DESKTOP }}
+        run: |
+          SHORT_GITHUB_SHA=${GITHUB_SHA::7}
+          SOURCE_IMAGE_TAG=flask-example-prod:$SHORT_GITHUB_SHA
+          TARGET_IMAGE_TAG=flask-example-$GITHUB_REF_NAME:$SHORT_GITHUB_SHA
+          echo "GITHUB_REF_NAME=$GITHUB_REF_NAME" >> $GITHUB_ENV
+          echo "CONDUIT_SECRET=$CONDUIT_SECRET" >> $GITHUB_ENV
+          echo "SOURCE_IMAGE_TAG=$SOURCE_IMAGE_TAG" >> $GITHUB_ENV
+          echo "TARGET_IMAGE_TAG=$TARGET_IMAGE_TAG" >> $GITHUB_ENV
+          echo $PWD
+          ls
+      - name: build base image on dev branch
+        if: ${{ env.GITHUB_REF_NAME == 'dev' }}
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile-prod
+          push: false
+          tags: ${{ env.SOURCE_IMAGE_TAG }}
+      - name: build target image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile-${{ env.GITHUB_REF_NAME }}
+          push: false
+          build-args: SOURCE_IMAGE_TAG=${{ env.SOURCE_IMAGE_TAG }}
+          tags: ${{ env.TARGET_IMAGE_TAG }}
+      - name: print image
+        shell: bash
         run:
-          echo "SECRET:"$CONDUIT_SECRET
-  build:
-    needs: init_var
-    runs-on: ubuntu-latest
-    steps:
-      - shell: bash
-        run:
-          echo "build production image as base image"
-          echo "build dev image from base image"
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - shell: bash
+          docker images $TARGET_IMAGE_TAG
+      - name: test
+        shell: bash
+        if: ${{ env.GITHUB_REF_NAME == 'dev' }}
         run:
           echo "run container over the dev image with test command"
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - shell: bash
-        name: push image
+      - name: push image
         run:
           echo "push image to harbor"
-      - shell: bash
-        name: deploy app
+      - name: deploy app
         run:
           echo "deploy to dev/prod environment"
   init_monitor:
-    needs: deploy
+    needs: build_and_deploy
     runs-on: ubuntu-latest
     steps:
       - shell: bash
         run:
-          echo "setup metrics and alert"
+          echo "setup metrics and alert if monitor not set"
 
   
