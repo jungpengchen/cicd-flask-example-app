@@ -8,6 +8,9 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
       - name: set environment variables
         id: set_env
         env:
@@ -21,7 +24,6 @@ jobs:
           echo "SOURCE_IMAGE_TAG=$SOURCE_IMAGE_TAG" >> $GITHUB_ENV
           echo "TARGET_IMAGE_TAG=$TARGET_IMAGE_TAG" >> $GITHUB_ENV
           echo $PWD
-          ls
       - name: build base image on dev branch
         if: ${{ env.GITHUB_REF_NAME == 'dev' }}
         uses: docker/build-push-action@v3
