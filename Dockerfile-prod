@@ -1,0 +1,10 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+COPY flask-realworld-example-app/requirements /requirements
+RUN pip install --no-cache-dir -r /requirements/prod.txt
+ENV FLASK_APP=/path/to/autoapp.py
+ENV FLASK_DEBUG=0
+COPY flask-realworld-example-app /app
+
+CMD ['flask','run','--with-threads']

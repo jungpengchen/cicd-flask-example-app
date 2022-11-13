@@ -1,0 +1,8 @@
+ARG BASE_IMAGE=python:3.9-slim
+FROM flask-example:base
+
+RUN pip install --no-cache-dir -r /requirements/dev.txt
+ENV FLASK_APP=/path/to/autoapp.py
+ENV FLASK_DEBUG=1
+
+CMD ['flask','run','--with-threads']
