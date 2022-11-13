@@ -5,7 +5,7 @@ on:
       - main
       - prod
 jobs:
-  init_env:
+  init_var:
     runs-on: ubuntu-latest
     steps:
       - shell: bash
@@ -13,3 +13,30 @@ jobs:
           CONDUIT_SECRET: ${{ secrets.SECRET_DESKTOP }}
         run:
           echo "SECRET:"$CONDUIT_SECRET
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - shell: bash
+        run:
+          echo "build production image as base image"
+          echo "build dev image from base image"
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - shell: bash
+        run:
+          echo "run container over the dev image with test command"
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - shell: bash
+        name: push image
+        run:
+          echo "push image to harbor"
+      - shell: bash
+        name: deploy app
+        run:
+          echo "deploy to dev/prod environment"
+
+
+  
