@@ -2,7 +2,7 @@ name: CICD process
 on:
   push:
     branches:
-      - master
+      - main
       - prod
 jobs:
   init_env:
