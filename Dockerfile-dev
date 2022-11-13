@@ -1,5 +1,5 @@
 ARG BASE_IMAGE=python:3.9-slim
-FROM flask-example:base
+FROM $BASE_IMAGE
 
 RUN pip install --no-cache-dir -r /requirements/dev.txt
 ENV FLASK_APP=/path/to/autoapp.py

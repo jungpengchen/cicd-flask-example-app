@@ -15,12 +15,14 @@ jobs:
         id: set_env
         env:
           CONDUIT_SECRET: ${{ secrets.SECRET_DESKTOP }}
+          DOCKER_REGISTRY: docker.io/library/
         run: |
           SHORT_GITHUB_SHA=${GITHUB_SHA::7}
           SOURCE_IMAGE_TAG=flask-example-prod:$SHORT_GITHUB_SHA
           TARGET_IMAGE_TAG=flask-example-$GITHUB_REF_NAME:$SHORT_GITHUB_SHA
           echo "GITHUB_REF_NAME=$GITHUB_REF_NAME" >> $GITHUB_ENV
           echo "CONDUIT_SECRET=$CONDUIT_SECRET" >> $GITHUB_ENV
+          echo "DOCKER_REGISTRY=$DOCKER_REGISTRY" >> $GITHUB_ENV
           echo "SOURCE_IMAGE_TAG=$SOURCE_IMAGE_TAG" >> $GITHUB_ENV
           echo "TARGET_IMAGE_TAG=$TARGET_IMAGE_TAG" >> $GITHUB_ENV
           echo $PWD
@@ -32,13 +34,17 @@ jobs:
           file: ./Dockerfile-prod
           push: false
           tags: ${{ env.SOURCE_IMAGE_TAG }}
+      - name: print image
+        shell: bash
+        run:
+          docker images
       - name: build target image
         uses: docker/build-push-action@v3
         with:
           context: .
           file: ./Dockerfile-${{ env.GITHUB_REF_NAME }}
           push: false
-          build-args: SOURCE_IMAGE_TAG=${{ env.SOURCE_IMAGE_TAG }}
+          build-args: BASE_IMAGE=${{ env.SOURCE_IMAGE_TAG }}
           tags: ${{ env.TARGET_IMAGE_TAG }}
       - name: print image
         shell: bash
