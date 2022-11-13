@@ -1,0 +1,15 @@
+name: CICD process 
+on:
+  push:
+    branches:
+      - master
+      - prod
+jobs:
+  init_env:
+    runs-on: ubuntu-latest
+    steps:
+      - shell: bash
+        env:
+          CONDUIT_SECRET: ${{ secrets.SECRET_DESKTOP }}
+        run:
+          echo "SECRET:"$CONDUIT_SECRET
