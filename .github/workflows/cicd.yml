@@ -47,14 +47,13 @@ jobs:
           build-args: BASE_IMAGE=${{ env.SOURCE_IMAGE_TAG }}
           tags: ${{ env.TARGET_IMAGE_TAG }}
       - name: print image
-        shell: bash
         run:
           docker images $TARGET_IMAGE_TAG
       - name: test
-        shell: bash
         if: ${{ env.GITHUB_REF_NAME == 'dev' }}
         run:
-          echo "run container over the dev image with test command"
+          docker run -it $TARGET_IMAGE_TAG flask test
+          
       - name: push image
         run:
           echo "push image to harbor"
