@@ -18,16 +18,13 @@ jobs:
           DOCKER_REGISTRY: docker.io/library/
         run: |
           SHORT_GITHUB_SHA=${GITHUB_SHA::7}
-          SOURCE_IMAGE_TAG=flask-example-prod:$SHORT_GITHUB_SHA
           TARGET_IMAGE_TAG=flask-example-$GITHUB_REF_NAME:$SHORT_GITHUB_SHA
           echo "GITHUB_REF_NAME=$GITHUB_REF_NAME" >> $GITHUB_ENV
           echo "CONDUIT_SECRET=$CONDUIT_SECRET" >> $GITHUB_ENV
           echo "DOCKER_REGISTRY=$DOCKER_REGISTRY" >> $GITHUB_ENV
-          echo "SOURCE_IMAGE_TAG=$SOURCE_IMAGE_TAG" >> $GITHUB_ENV
           echo "TARGET_IMAGE_TAG=$TARGET_IMAGE_TAG" >> $GITHUB_ENV
-          echo $PWD
       - uses: docker/setup-buildx-action@v2
-      - name: build target image
+      - name: build image
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -40,14 +37,14 @@ jobs:
           cache-to: type=gha,mode=max
       - name: print image
         run:
-          docker images
+          docker images $TARGET_IMAGET_TAG
       - name: test
         if: ${{ env.GITHUB_REF_NAME == 'dev' }}
         run:
           docker run --rm $TARGET_IMAGE_TAG flask test
       - name: push image
         run:
-          echo "push image to harbor"
+          echo "push image to docker registry"
       - name: deploy app
         run:
           echo "deploy to dev/prod environment"
